@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/raymondma-public/raymond-commerse:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/raymondma-public/raymond-commerse:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: raymond-commerse
+        chartPath: charts/raymond-commerse
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/raymondma-public/raymond-commerse'
+          image.tag: '{{.DIGEST_HEX}}'
